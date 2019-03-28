@@ -1,0 +1,32 @@
+{
+  "name": "alkis-stamos/hydrator",
+  "description": "Hydrate or extract data from PHP classes to arrays and back",
+  "license": "MIT",
+  "keywords": ["hydrator","extract","map"],
+  "authors": [{
+	"name": "Alkis Stamos",
+	"email": "stamosalkis@gmail.com"
+  }],
+  "require": {
+	"php": "^7.1",
+	"alkis-stamos/metadata": "dev-master"
+  },
+  "repositories": [{
+	"type": "vcs",
+	"url": "git@github.com:AlkisStamos/metadata.git",
+	"no-api": true
+  }],
+  "autoload": {
+	"psr-4": {
+	  "AlkisStamos\\Metadata\\": "src"
+	}
+  },
+  "autoload-dev": {
+	"psr-4": {
+	  "AlkisStamos\\Metadata\\Tests\\": "tests"
+	}
+  },
+  "require-dev": {
+	"phpunit/phpunit": "^7.4"
+  }
+}
