@@ -564,4 +564,14 @@ class Hydrator implements HydratorInterface
     {
         return isset($this->hooks[$strategy]) ? $this->hooks[$strategy] : null;
     }
+
+    /**
+     * Overrides the current instantiator
+     *
+     * @param InstantiatorInterface $instantiator
+     */
+    public function setInstantiator(InstantiatorInterface $instantiator)
+    {
+        $this->instantiator = $instantiator;
+    }
 }

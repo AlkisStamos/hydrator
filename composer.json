@@ -19,7 +19,8 @@
   "autoload": {
 	"psr-4": {
 	  "AlkisStamos\\Metadata\\": "src"
-	}
+	},
+	"classmap": ["mock"]
   },
   "autoload-dev": {
 	"psr-4": {

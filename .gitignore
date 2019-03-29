@@ -3,3 +3,4 @@ composer.phar
 /.idea
 /mock/
 /var/
+debug.php

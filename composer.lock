@@ -12,12 +12,12 @@
             "source": {
                 "type": "git",
                 "url": "git@github.com:AlkisStamos/metadata.git",
-                "reference": "cfc8cf2189d644b08a1d19b73d268199b002a0a1"
+                "reference": "3ba165bc4ea0e265a291c94a9c56804558654251"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/AlkisStamos/metadata/zipball/cfc8cf2189d644b08a1d19b73d268199b002a0a1",
-                "reference": "cfc8cf2189d644b08a1d19b73d268199b002a0a1",
+                "url": "https://api.github.com/repos/AlkisStamos/metadata/zipball/3ba165bc4ea0e265a291c94a9c56804558654251",
+                "reference": "3ba165bc4ea0e265a291c94a9c56804558654251",
                 "shasum": ""
             },
             "require": {
@@ -26,6 +26,7 @@
                 "psr/simple-cache": "^1.0"
             },
             "require-dev": {
+                "mikey179/vfsstream": "^1.6",
                 "phpunit/phpunit": "^7.4"
             },
             "type": "library",
@@ -52,7 +53,7 @@
             "keywords": [
                 "metadata"
             ],
-            "time": "2019-03-28T13:15:26+00:00"
+            "time": "2019-03-29T14:42:00+00:00"
         },
         {
             "name": "doctrine/annotations",
