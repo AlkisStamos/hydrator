@@ -19,6 +19,8 @@ use AlkisStamos\Metadata\Metadata\TypeMetadata;
  */
 class FlatTypeCastStrategy implements TypeCastStrategyInterface
 {
+    /** @var array Supported types of the typecaster */
+    const SUPPORTED_TYPES = ['string', 'null', 'NULL', 'boolean', 'bool', 'integer', 'int', 'float', 'double'];
     /**
      * Defines the name of the strategy the type casting should run. If the method returns null the type cast should
      * be used when no strategy is defined or as a fallback.
@@ -31,13 +33,14 @@ class FlatTypeCastStrategy implements TypeCastStrategyInterface
     }
 
     /**
-     * Returns the list of custom/flat types the service supports
+     * Returns if the strategy supports the typemetadata
      *
-     * @return array
+     * @param TypeMetadata $metadata
+     * @return bool
      */
-    public function supports(): array
+    public function isSupported(TypeMetadata $metadata): bool
     {
-        return ['string', 'null', 'NULL', 'boolean', 'bool', 'integer', 'int', 'float', 'double'];
+        return in_array($metadata->name, self::SUPPORTED_TYPES);
     }
 
     /**

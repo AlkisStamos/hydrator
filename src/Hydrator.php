@@ -446,10 +446,7 @@ class Hydrator implements HydratorInterface
         {
             $this->castStrategies[$strategy] = [];
         }
-        foreach($castStrategy->supports() as $type)
-        {
-            $this->castStrategies[$strategy][$type] = $castStrategy;
-        }
+        $this->castStrategies[$strategy][] = $castStrategy;
         return $this;
     }
 
@@ -461,14 +458,19 @@ class Hydrator implements HydratorInterface
      */
     public function getSupportedTypecastStrategy(TypeMetadata $metadata)
     {
-        $type = $metadata->name;
-        if(isset($this->castStrategies[$this->strategy][$type]))
+        foreach($this->castStrategies[$this->strategy] as $castStrategy)
         {
-            return $this->castStrategies[$this->strategy][$type];
+            if($castStrategy->isSupported($metadata))
+            {
+                return $castStrategy;
+            }
         }
-        if(isset($this->castStrategies['_default'][$type]))
+        foreach($this->castStrategies['_default'] as $castStrategy)
         {
-            return $this->castStrategies['_default'][$type];
+            if($castStrategy->isSupported($metadata))
+            {
+                return $castStrategy;
+            }
         }
         return null;
     }

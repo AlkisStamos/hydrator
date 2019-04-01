@@ -28,11 +28,12 @@ interface TypeCastStrategyInterface
     public function strategy(): ?string;
 
     /**
-     * Returns the list of custom/flat types the service supports
+     * Returns if the strategy supports the typemetadata
      *
-     * @return array
+     * @param TypeMetadata $metadata
+     * @return bool
      */
-    public function supports(): array;
+    public function isSupported(TypeMetadata $metadata): bool;
 
     /**
      * Runs the type cast methods on extract direction (when an object is being converted to an array) for the allowed

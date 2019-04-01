@@ -19,6 +19,8 @@ use AlkisStamos\Metadata\Metadata\TypeMetadata;
  */
 class DateTimeCastStrategy implements TypeCastStrategyInterface
 {
+    /** @var array Supported types of the typecaster */
+    const SUPPORTED_TYPES = ['DateTime','\DateTime','date_time'];
     /** @var string The default iso format for date time objects */
     const DEFAULT_FORMAT = 'Y-m-d\TH:i:sO';
     /**
@@ -33,13 +35,14 @@ class DateTimeCastStrategy implements TypeCastStrategyInterface
     }
 
     /**
-     * Returns the list of custom/flat types the service supports
+     * Returns if the strategy supports the typemetadata
      *
-     * @return array
+     * @param TypeMetadata $metadata
+     * @return bool
      */
-    public function supports(): array
+    public function isSupported(TypeMetadata $metadata): bool
     {
-        return ['DateTime','\DateTime','date_time'];
+        return in_array($metadata->name,self::SUPPORTED_TYPES);
     }
 
     /**
@@ -69,6 +72,10 @@ class DateTimeCastStrategy implements TypeCastStrategyInterface
      */
     public function hydrate(TypeMetadata $metadata, $value)
     {
+        if(filter_var($value, FILTER_VALIDATE_INT) !== false)
+        {
+            return new \DateTime('@'.$value);
+        }
         return $metadata->format === null ? \DateTime::createFromFormat(self::DEFAULT_FORMAT,$value) : \DateTime::createFromFormat($metadata->format,$value);
     }
 }
