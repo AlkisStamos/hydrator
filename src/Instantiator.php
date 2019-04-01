@@ -6,7 +6,8 @@
  * file that was distributed with this source code.
  */
 
-namespace AlkisStamos\Metadata;
+namespace AlkisStamos\Hydrator;
+
 /**
  * @package Metadata
  * @author Alkis Stamos <stamosalkis@gmail.com>
@@ -58,7 +59,7 @@ class Instantiator implements InstantiatorInterface
      * @return \ReflectionClass
      * @throws \ReflectionException
      */
-    public function getReflectionClass(string $class)
+    public function getReflectionClass(string $class): \ReflectionClass
     {
         if(!isset($this->reflections[$class]))
         {

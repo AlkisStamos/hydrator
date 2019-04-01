@@ -6,7 +6,8 @@
  * file that was distributed with this source code.
  */
 
-namespace AlkisStamos\Metadata;
+namespace AlkisStamos\Hydrator;
+
 /**
  * @package Metadata
  * @author Alkis Stamos <stamosalkis@gmail.com>

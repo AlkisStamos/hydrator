@@ -6,7 +6,7 @@
  * file that was distributed with this source code.
  */
 
-namespace AlkisStamos\Metadata\Cast;
+namespace AlkisStamos\Hydrator\Cast;
 use AlkisStamos\Metadata\Metadata\TypeMetadata;
 
 /**

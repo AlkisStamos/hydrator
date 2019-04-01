@@ -6,18 +6,19 @@
  * file that was distributed with this source code.
  */
 
-namespace AlkisStamos\Metadata;
-use AlkisStamos\Metadata\Cast\DateTimeCastStrategy;
-use AlkisStamos\Metadata\Cast\FlatTypeCastStrategy;
-use AlkisStamos\Metadata\Cast\TypeCastStrategyInterface;
+namespace AlkisStamos\Hydrator;
+use AlkisStamos\Hydrator\Cast\DateTimeCastStrategy;
+use AlkisStamos\Hydrator\Cast\FlatTypeCastStrategy;
+use AlkisStamos\Hydrator\Cast\TypeCastStrategyInterface;
 use AlkisStamos\Metadata\Driver\MetadataDriverInterface;
 use AlkisStamos\Metadata\Metadata\ClassMetadata;
 use AlkisStamos\Metadata\Metadata\PropertyMetadata;
 use AlkisStamos\Metadata\Metadata\TypeMetadata;
-use AlkisStamos\Metadata\Naming\NamingStrategyInterface;
-use AlkisStamos\Metadata\Naming\UnderscoreNamingStrategy;
-use AlkisStamos\Metadata\Resolver\PathNameValueResolver;
-use AlkisStamos\Metadata\Resolver\PropertyValueResolverInterface;
+use AlkisStamos\Hydrator\Naming\NamingStrategyInterface;
+use AlkisStamos\Hydrator\Naming\UnderscoreNamingStrategy;
+use AlkisStamos\Hydrator\Resolver\PathNameValueResolver;
+use AlkisStamos\Hydrator\Resolver\PropertyValueResolverInterface;
+use AlkisStamos\Metadata\MetadataDriver;
 use Psr\SimpleCache\CacheInterface;
 
 /**
@@ -573,5 +574,15 @@ class Hydrator implements HydratorInterface
     public function setInstantiator(InstantiatorInterface $instantiator)
     {
         $this->instantiator = $instantiator;
+    }
+
+    /**
+     * Returns the hydrator's metadata driver for testing custom instantiation scenarios
+     *
+     * @return MetadataDriverInterface
+     */
+    public function getMetadataDriver(): MetadataDriverInterface
+    {
+        return $this->driver;
     }
 }

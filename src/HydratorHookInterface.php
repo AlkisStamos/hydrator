@@ -6,7 +6,7 @@
  * file that was distributed with this source code.
  */
 
-namespace AlkisStamos\Metadata;
+namespace AlkisStamos\Hydrator;
 use AlkisStamos\Metadata\Metadata\ClassMetadata;
 use AlkisStamos\Metadata\Metadata\PropertyMetadata;
 
