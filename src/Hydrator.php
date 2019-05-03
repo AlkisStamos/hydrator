@@ -147,6 +147,7 @@ class Hydrator implements HydratorInterface
             }
             else
             {
+//                $value = $preferHook === true ? $targetData : $this->mapProperty($property,$targetData); //TODO: this may be better allowing the hook to decide the payload
                 $value = $this->mapProperty($property,$targetData);
                 $this->setProperty($metadata,$property,$instance,$value);
             }

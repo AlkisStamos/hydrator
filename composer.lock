@@ -12,12 +12,12 @@
             "source": {
                 "type": "git",
                 "url": "git@github.com:AlkisStamos/metadata.git",
-                "reference": "3ba165bc4ea0e265a291c94a9c56804558654251"
+                "reference": "f3623cb6d06e653f125b879629e44f2f2a616b57"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/AlkisStamos/metadata/zipball/3ba165bc4ea0e265a291c94a9c56804558654251",
-                "reference": "3ba165bc4ea0e265a291c94a9c56804558654251",
+                "url": "https://api.github.com/repos/AlkisStamos/metadata/zipball/f3623cb6d06e653f125b879629e44f2f2a616b57",
+                "reference": "f3623cb6d06e653f125b879629e44f2f2a616b57",
                 "shasum": ""
             },
             "require": {
@@ -53,7 +53,7 @@
             "keywords": [
                 "metadata"
             ],
-            "time": "2019-03-29T14:42:00+00:00"
+            "time": "2019-04-01T13:31:34+00:00"
         },
         {
             "name": "cache/adapter-common",
