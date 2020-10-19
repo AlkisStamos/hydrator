@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "a4bb9c2fab06d2cb1ec82fe12db46aad",
+    "content-hash": "00fbc4450ac468e2b2541f8fcfcf7667",
     "packages": [
         {
             "name": "alks/metadata",
