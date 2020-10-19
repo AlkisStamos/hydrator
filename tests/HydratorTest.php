@@ -11,10 +11,10 @@ use AlkisStamos\Hydrator\Hydrator;
 use AlkisStamos\Hydrator\HydratorHookInterface;
 use AlkisStamos\Hydrator\InstantiatorInterface;
 use AlkisStamos\Hydrator\Resolver\PropertyValueResolverInterface;
-use AlkisStamos\Metadata\Driver\MetadataDriverInterface;
-use AlkisStamos\Metadata\Metadata\ClassMetadata;
-use AlkisStamos\Metadata\Metadata\PropertyMetadata;
-use AlkisStamos\Metadata\MetadataDriver;
+use Alks\Metadata\Driver\MetadataDriverInterface;
+use Alks\Metadata\Metadata\ClassMetadata;
+use Alks\Metadata\Metadata\PropertyMetadata;
+use Alks\Metadata\MetadataDriver;
 use PHPUnit\Framework\TestCase;
 
 class HydratorTest extends TestCase

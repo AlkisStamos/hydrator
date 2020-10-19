@@ -7,8 +7,9 @@
  */
 
 namespace AlkisStamos\Hydrator;
-use AlkisStamos\Metadata\Metadata\ClassMetadata;
-use AlkisStamos\Metadata\Metadata\PropertyMetadata;
+
+use Alks\Metadata\Metadata\ClassMetadata;
+use Alks\Metadata\Metadata\PropertyMetadata;
 
 /**
  * @package Metadata
@@ -70,7 +71,7 @@ interface HydratorHookInterface
      * @param bool $preferValue
      * @return mixed
      */
-    public function onPropertyHydrate(ClassMetadata $classMetadata, PropertyMetadata $propertyMetadata, $targetData, bool &$preferValue=false);
+    public function onPropertyHydrate(ClassMetadata $classMetadata, PropertyMetadata $propertyMetadata, $targetData, bool &$preferValue = false);
 
     /**
      * Runs as soon as the hydrator resolves the content to extract for a property. If the preferValue reference is set
@@ -82,5 +83,5 @@ interface HydratorHookInterface
      * @param bool $preferValue
      * @return mixed
      */
-    public function onPropertyExtract(ClassMetadata $classMetadata, PropertyMetadata $propertyMetadata, $extractedContent, bool &$preferValue=false);
+    public function onPropertyExtract(ClassMetadata $classMetadata, PropertyMetadata $propertyMetadata, $extractedContent, bool &$preferValue = false);
 }

@@ -7,6 +7,8 @@
  */
 
 namespace AlkisStamos\Hydrator;
+use ReflectionClass;
+
 /**
  * @package Metadata
  * @author Alkis Stamos <stamosalkis@gmail.com>
@@ -24,13 +26,13 @@ interface InstantiatorInterface
      * @param array|null $constructorArgs
      * @return mixed
      */
-    public function instantiate(string $class, ?array $constructorArgs=null);
+    public function instantiate(string $class, ?array $constructorArgs = null);
 
     /**
      * Returns the reflection class of the class parameter
      *
      * @param string $class
-     * @return \ReflectionClass
+     * @return ReflectionClass
      */
     public function getReflectionClass(string $class);
 }

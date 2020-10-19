@@ -8,6 +8,9 @@
 
 namespace AlkisStamos\Hydrator;
 
+use ReflectionClass;
+use ReflectionException;
+
 /**
  * @package Metadata
  * @author Alkis Stamos <stamosalkis@gmail.com>
@@ -27,7 +30,7 @@ class Instantiator implements InstantiatorInterface
     /**
      * In memory cache of handled ReflectionClasses
      *
-     * @var \ReflectionClass[]
+     * @var ReflectionClass[]
      */
     protected $reflections = [];
 
@@ -35,15 +38,14 @@ class Instantiator implements InstantiatorInterface
      * Instantiates a class by its name. By default the method will instantiate without constructor usage. If the
      * constructorArgs parameter is set the method will force a new instance by passing the arguments in the constructor
      *
-     * @param string$class
+     * @param string $class
      * @param array|null $constructorArgs
      * @return mixed
-     * @throws \ReflectionException
+     * @throws ReflectionException
      */
-    public function instantiate(string $class, ?array $constructorArgs=null)
+    public function instantiate(string $class, ?array $constructorArgs = null)
     {
-        if(!isset($this->instances[$class]))
-        {
+        if (!isset($this->instances[$class])) {
             $reflection = $this->getReflectionClass($class);
             $this->instances[$class] = $constructorArgs === null ?
                 $reflection->newInstanceWithoutConstructor() :
@@ -56,14 +58,13 @@ class Instantiator implements InstantiatorInterface
      * Generates and caches a new reflection class from the class name.
      *
      * @param string $class
-     * @return \ReflectionClass
-     * @throws \ReflectionException
+     * @return ReflectionClass
+     * @throws ReflectionException
      */
-    public function getReflectionClass(string $class): \ReflectionClass
+    public function getReflectionClass(string $class): ReflectionClass
     {
-        if(!isset($this->reflections[$class]))
-        {
-            $this->reflections[$class] = new \ReflectionClass($class);
+        if (!isset($this->reflections[$class])) {
+            $this->reflections[$class] = new ReflectionClass($class);
         }
         return $this->reflections[$class];
     }

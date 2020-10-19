@@ -7,7 +7,8 @@
  */
 
 namespace AlkisStamos\Hydrator\Naming;
-use AlkisStamos\Metadata\Metadata\PropertyMetadata;
+
+use Alks\Metadata\Metadata\PropertyMetadata;
 
 /**
  * @package Metadata
@@ -43,7 +44,7 @@ class UnderscoreNamingStrategy implements NamingStrategyInterface
      */
     public function setterName(PropertyMetadata $propertyMetadata): string
     {
-        return 'set'.ucfirst($propertyMetadata->name);
+        return 'set' . ucfirst($propertyMetadata->name);
     }
 
     /**
@@ -54,10 +55,9 @@ class UnderscoreNamingStrategy implements NamingStrategyInterface
      */
     public function getterName(PropertyMetadata $propertyMetadata): string
     {
-        if($propertyMetadata->type->name === 'bool' || $propertyMetadata->type->name === 'boolean')
-        {
-            return 'is'.ucfirst($propertyMetadata->name);
+        if ($propertyMetadata->type->name === 'bool' || $propertyMetadata->type->name === 'boolean') {
+            return 'is' . ucfirst($propertyMetadata->name);
         }
-        return 'get'.ucfirst($propertyMetadata->name);
+        return 'get' . ucfirst($propertyMetadata->name);
     }
 }

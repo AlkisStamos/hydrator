@@ -7,7 +7,8 @@
  */
 
 namespace AlkisStamos\Hydrator\Naming;
-use AlkisStamos\Metadata\Metadata\PropertyMetadata;
+
+use Alks\Metadata\Metadata\PropertyMetadata;
 
 /**
  * @package Metadata

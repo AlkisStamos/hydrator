@@ -17,7 +17,7 @@ namespace AlkisStamos\Hydrator\Annotation;
  *
  * @Annotation
  */
-class Property extends \AlkisStamos\Metadata\Annotation\Property
+class Property extends \Alks\Metadata\Annotation\Property
 {
     /**
      * The name of the property in the source array
@@ -39,13 +39,11 @@ class Property extends \AlkisStamos\Metadata\Annotation\Property
      */
     public function __construct(array $data)
     {
-        if(isset($data['from']))
-        {
+        if (isset($data['from'])) {
             $data['attrs']['source_name'] = $data['from'];
             unset($data['from']);
         }
-        if(isset($data['to']))
-        {
+        if (isset($data['to'])) {
             $data['attrs']['extract_name'] = $data['to'];
             unset($data['to']);
         }

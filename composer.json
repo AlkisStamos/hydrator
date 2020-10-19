@@ -9,14 +9,9 @@
   }],
   "require": {
 	"php": "^7.1",
-	"alkis-stamos/metadata": "dev-master",
+	"alks/metadata": "^1.0",
     "cache/filesystem-adapter": "^1.0"
   },
-  "repositories": [{
-	"type": "vcs",
-	"url": "git@github.com:AlkisStamos/metadata.git",
-	"no-api": true
-  }],
   "autoload": {
 	"psr-4": {
 	  "AlkisStamos\\Hydrator\\": "src"

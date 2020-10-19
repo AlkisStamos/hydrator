@@ -26,7 +26,7 @@ interface HydratorInterface
      * @param string $class Fully qualified class name
      * @return mixed An object of type $class
      */
-    public function hydrate(array $data, string $class, ?string $strategy=null);
+    public function hydrate(array $data, string $class, ?string $strategy = null);
 
     /**
      * Extracts and object back to an array
@@ -35,7 +35,7 @@ interface HydratorInterface
      * @param string|null $strategy The current hydration strategy
      * @return array
      */
-    public function extract($object, ?string $strategy=null): array;
+    public function extract($object, ?string $strategy = null): array;
 
     /**
      * Attaches a hook listener to the hydrator

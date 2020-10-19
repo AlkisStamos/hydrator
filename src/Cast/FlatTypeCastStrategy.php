@@ -7,7 +7,9 @@
  */
 
 namespace AlkisStamos\Hydrator\Cast;
-use AlkisStamos\Metadata\Metadata\TypeMetadata;
+
+use Alks\Metadata\Metadata\TypeMetadata;
+use stdClass;
 
 /**
  * @package Metadata
@@ -21,6 +23,7 @@ class FlatTypeCastStrategy implements TypeCastStrategyInterface
 {
     /** @var array Supported types of the typecaster */
     const SUPPORTED_TYPES = ['string', 'null', 'NULL', 'boolean', 'bool', 'integer', 'int', 'float', 'double'];
+
     /**
      * Defines the name of the strategy the type casting should run. If the method returns null the type cast should
      * be used when no strategy is defined or as a fallback.
@@ -53,7 +56,7 @@ class FlatTypeCastStrategy implements TypeCastStrategyInterface
      */
     public function extract(TypeMetadata $metadata, $value)
     {
-        return $this->hydrate($metadata,$value);
+        return $this->hydrate($metadata, $value);
     }
 
     /**
@@ -67,19 +70,34 @@ class FlatTypeCastStrategy implements TypeCastStrategyInterface
     public function hydrate(TypeMetadata $metadata, $value)
     {
         $type = $metadata->name;
-        if($metadata->isArray && is_array($value))
-        {
-            if($type === 'object')
-            {
+        if ($metadata->isArray && is_array($value)) {
+            if ($type === 'object') {
                 return $this->objectCast($value);
             }
-            if($type === 'array' || $type === 'mixed')
-            {
+            if ($type === 'array' || $type === 'mixed') {
                 return $value;
             }
-            return $this->arrayCast($type,$value);
+            return $this->arrayCast($type, $value);
         }
-        return $this->flatCast($type,$value);
+        return $this->flatCast($type, $value);
+    }
+
+    /**
+     * Casts the values to an std object recursively
+     *
+     * @param $values
+     * @return stdClass
+     */
+    protected function objectCast(array $values)
+    {
+        $object = new stdClass();
+        foreach ($values as $key => $value) {
+            if (is_array($value)) {
+                $value = $this->objectCast($value);
+            }
+            $object->$key = $value;
+        }
+        return $object;
     }
 
     /**
@@ -92,38 +110,14 @@ class FlatTypeCastStrategy implements TypeCastStrategyInterface
     protected function arrayCast($type, array $values)
     {
         $res = [];
-        foreach($values as $key => $value)
-        {
-            if(is_array($value))
-            {
+        foreach ($values as $key => $value) {
+            if (is_array($value)) {
                 $res[$key] = $this->arrayCast($type, $value);
-            }
-            else
-            {
+            } else {
                 $res[$key] = $this->flatCast($type, $value);
             }
         }
         return $res;
-    }
-
-    /**
-     * Casts the values to an std object recursively
-     *
-     * @param $values
-     * @return \stdClass
-     */
-    protected function objectCast(array $values)
-    {
-        $object = new \stdClass();
-        foreach($values as $key => $value)
-        {
-            if(is_array($value))
-            {
-                $value = $this->objectCast($value);
-            }
-            $object->$key = $value;
-        }
-        return $object;
     }
 
     /**
@@ -135,21 +129,14 @@ class FlatTypeCastStrategy implements TypeCastStrategyInterface
      */
     protected function flatCast($type, $value)
     {
-        if($type === 'string')
-        {
+        if ($type === 'string') {
             return (string)$value;
-        }
-        else if($type === 'int' || $type === 'integer')
-        {
+        } else if ($type === 'int' || $type === 'integer') {
             return (int)$value;
-        }
-        else if($type === 'float' || $type === 'double')
-        {
+        } else if ($type === 'float' || $type === 'double') {
             return (double)$value;
-        }
-        else if($type === 'bool' || $type === 'boolean')
-        {
-            return filter_var($value,FILTER_VALIDATE_BOOLEAN);
+        } else if ($type === 'bool' || $type === 'boolean') {
+            return filter_var($value, FILTER_VALIDATE_BOOLEAN);
         }
         return $value;
     }

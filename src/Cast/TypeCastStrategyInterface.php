@@ -7,7 +7,8 @@
  */
 
 namespace AlkisStamos\Hydrator\Cast;
-use AlkisStamos\Metadata\Metadata\TypeMetadata;
+
+use Alks\Metadata\Metadata\TypeMetadata;
 
 /**
  * @package Metadata

@@ -7,19 +7,24 @@
  */
 
 namespace AlkisStamos\Hydrator;
+
 use AlkisStamos\Hydrator\Cast\DateTimeCastStrategy;
 use AlkisStamos\Hydrator\Cast\FlatTypeCastStrategy;
 use AlkisStamos\Hydrator\Cast\TypeCastStrategyInterface;
-use AlkisStamos\Metadata\Driver\MetadataDriverInterface;
-use AlkisStamos\Metadata\Metadata\ClassMetadata;
-use AlkisStamos\Metadata\Metadata\PropertyMetadata;
-use AlkisStamos\Metadata\Metadata\TypeMetadata;
 use AlkisStamos\Hydrator\Naming\NamingStrategyInterface;
 use AlkisStamos\Hydrator\Naming\UnderscoreNamingStrategy;
 use AlkisStamos\Hydrator\Resolver\PathNameValueResolver;
 use AlkisStamos\Hydrator\Resolver\PropertyValueResolverInterface;
-use AlkisStamos\Metadata\MetadataDriver;
+use Alks\Metadata\Driver\MetadataDriverInterface;
+use Alks\Metadata\Metadata\ClassMetadata;
+use Alks\Metadata\Metadata\PropertyMetadata;
+use Alks\Metadata\Metadata\TypeMetadata;
+use Alks\Metadata\MetadataDriver;
+use Doctrine\Common\Annotations\AnnotationException;
 use Psr\SimpleCache\CacheInterface;
+use Psr\SimpleCache\InvalidArgumentException;
+use ReflectionException;
+use RuntimeException;
 
 /**
  * @package Metadata
@@ -76,27 +81,22 @@ class Hydrator implements HydratorInterface
 
     /**
      * Hydrator constructor.
-     * Instantiates the hydrator with the prefered configured dependencies
+     * Instantiates the hydrator with the preferred configured dependencies
      * @param MetadataDriverInterface|null $driver
      * @param InstantiatorInterface|null $instantiator
      * @param NamingStrategyInterface|null $namingStrategy
-     * @throws \Doctrine\Common\Annotations\AnnotationException
+     * @throws AnnotationException
      */
-    public function __construct(MetadataDriverInterface $driver=null, InstantiatorInterface $instantiator=null, NamingStrategyInterface $namingStrategy=null)
+    public function __construct(MetadataDriverInterface $driver = null, InstantiatorInterface $instantiator = null, NamingStrategyInterface $namingStrategy = null)
     {
-        if($driver === null)
-        {
+        if ($driver === null) {
             $this->driver = new MetadataDriver();
             $this->driver->enableAnnotations();
-        }
-        else if(get_class($driver) !== MetadataDriver::class)
-        {
+        } else if (get_class($driver) !== MetadataDriver::class) {
             $this->driver = new MetadataDriver([
                 $driver
             ]);
-        }
-        else
-        {
+        } else {
             $this->driver = $driver;
         }
         $this->instantiator = $instantiator === null ? new Instantiator() : $instantiator;
@@ -107,56 +107,90 @@ class Hydrator implements HydratorInterface
     }
 
     /**
+     * Adds a property name resolver in the list
+     *
+     * @param PropertyValueResolverInterface $propertyTargetResolver
+     * @return $this
+     */
+    public function addPropertyResolver(PropertyValueResolverInterface $propertyTargetResolver)
+    {
+        $strategy = $propertyTargetResolver->strategy();
+        $strategy = $strategy === null ? '_default' : $strategy;
+        $this->propertyResolvers[$strategy] = $propertyTargetResolver;
+        return $this;
+    }
+
+    /**
+     * Adds a type cast strategy to the hydrator. Note the strategies are indexed by their name/sypported types so in
+     * the same strategy name the last supported type string only would work.
+     *
+     * @param TypeCastStrategyInterface $castStrategy
+     * @return $this
+     */
+    public function addTypeCastStrategy(TypeCastStrategyInterface $castStrategy)
+    {
+        $strategy = $castStrategy->strategy();
+        $strategy = $strategy === null ? '_default' : $strategy;
+        if (!isset($this->castStrategies[$strategy])) {
+            $this->castStrategies[$strategy] = [];
+        }
+        $this->castStrategies[$strategy][] = $castStrategy;
+        return $this;
+    }
+
+    /**
      * Hydrates the data into an object of type $class
      *
      * @param array $data
      * @param string $class
      * @param null|string $strategy
      * @return mixed
-     * @throws \Psr\SimpleCache\InvalidArgumentException
-     * @throws \ReflectionException
+     * @throws InvalidArgumentException
+     * @throws ReflectionException
      */
-    public function hydrate(array $data, string $class, ?string $strategy=null)
+    public function hydrate(array $data, string $class, ?string $strategy = null)
     {
         $this->strategy = $strategy === null ? '_default' : $strategy;
         $metadata = $this->driver->getClassMetadata($this->instantiator->getReflectionClass($class));
         $hook = $this->getHookListener($this->strategy);
-        if($hook !== null)
-        {
-            $hook->onBeforeHydrate($metadata,$data);
+        if ($hook !== null) {
+            $hook->onBeforeHydrate($metadata, $data);
         }
         $instance = $this->instantiator->instantiate($class);
-        foreach($metadata->properties as $property)
-        {
+        foreach ($metadata->properties as $property) {
             $preferHook = false;
             $targetData = null;
-            if($hook !== null)
-            {
-                $targetData = $hook->onPropertyHydrate($metadata,$property,$data,$preferHook);
+            if ($hook !== null) {
+                $targetData = $hook->onPropertyHydrate($metadata, $property, $data, $preferHook);
             }
-            if(!$preferHook)
-            {
-                $targetData = $this->resolveDataInPayload($property,$data);
+            if (!$preferHook) {
+                $targetData = $this->resolveDataInPayload($property, $data);
             }
-            if($targetData === null)
-            {
-                if($property->type->isNullable)
-                {
-                    $this->setProperty($metadata,$property,$instance,null);
+            if ($targetData === null) {
+                if ($property->type->isNullable) {
+                    $this->setProperty($metadata, $property, $instance, null);
                 }
-            }
-            else
-            {
+            } else {
 //                $value = $preferHook === true ? $targetData : $this->mapProperty($property,$targetData); //TODO: this may be better allowing the hook to decide the payload
-                $value = $this->mapProperty($property,$targetData);
-                $this->setProperty($metadata,$property,$instance,$value);
+                $value = $this->mapProperty($property, $targetData);
+                $this->setProperty($metadata, $property, $instance, $value);
             }
         }
-        if($hook !== null)
-        {
-            $hook->onAfterHydrate($metadata,$instance);
+        if ($hook !== null) {
+            $hook->onAfterHydrate($metadata, $instance);
         }
         return $instance;
+    }
+
+    /**
+     * Returns the hydrator hook for the registered strategy, if any
+     *
+     * @param string $strategy
+     * @return HydratorHookInterface|null
+     */
+    public function getHookListener(string $strategy): ?HydratorHookInterface
+    {
+        return isset($this->hooks[$strategy]) ? $this->hooks[$strategy] : null;
     }
 
     /**
@@ -170,29 +204,23 @@ class Hydrator implements HydratorInterface
     protected function resolveDataInPayload(PropertyMetadata $propertyMetadata, array $payload)
     {
         $resolver = $this->getPropertyResolver();
-        if($resolver === null || !$resolver->supports($propertyMetadata))
-        {
+        if ($resolver === null || !$resolver->supports($propertyMetadata)) {
             $res = isset($payload[$propertyMetadata->name]) ? $payload[$propertyMetadata->name] : null;
-            if($res === null)
-            {
+            if ($res === null) {
                 $extractedName = $this->serializedPropertyName($propertyMetadata);
                 $res = isset($payload[$extractedName]) ? $payload[$extractedName] : null;
             }
             return $res;
         }
-        $profile = $resolver->resolveProperty($propertyMetadata,$payload);
-        if(strpos($profile,'.') !== false)
-        {
+        $profile = $resolver->resolveProperty($propertyMetadata, $payload);
+        if (strpos($profile, '.') !== false) {
             $nested = $payload;
-            $profileFragments = explode('.',$profile);
-            foreach($profileFragments as $profileIndex=>$profileItem)
-            {
-                if(!array_key_exists($profileItem,$nested))
-                {
+            $profileFragments = explode('.', $profile);
+            foreach ($profileFragments as $profileIndex => $profileItem) {
+                if (!array_key_exists($profileItem, $nested)) {
                     break;
                 }
-                if(!isset($profileFragments[$profileIndex + 1]))
-                {
+                if (!isset($profileFragments[$profileIndex + 1])) {
                     return $nested[$profileItem];
                 }
                 $nested = $nested[$profileItem];
@@ -202,39 +230,19 @@ class Hydrator implements HydratorInterface
     }
 
     /**
-     * Maps and type casts the value according to the property metadata. The method will no map the value to the
-     * property
+     * Returns the property resolver for the current or default strategy
      *
-     * @param PropertyMetadata $metadata
-     * @param $value
-     * @return array|mixed
-     * @throws \Psr\SimpleCache\InvalidArgumentException
-     * @throws \ReflectionException
+     * @return PropertyValueResolverInterface|null
      */
-    protected function mapProperty(PropertyMetadata $metadata, $value)
+    protected function getPropertyResolver()
     {
-        $customTypecast = $this->getSupportedTypecastStrategy($metadata->type);
-        if($customTypecast !== null)
-        {
-            return $customTypecast->hydrate($metadata->type,$value);
+        if (isset($this->propertyResolvers[$this->strategy])) {
+            return $this->propertyResolvers[$this->strategy];
         }
-        if(!$metadata->type->isFlat && is_array($value))
-        {
-            if($metadata->type->isArray)
-            {
-                $res = [];
-                foreach($value as $key=>$item)
-                {
-                    $res[$key] = $this->hydrate($item,$metadata->type->name,$this->strategy);
-                }
-                return $res;
-            }
-            else
-            {
-                return $this->hydrate($value,$metadata->type->name,$this->strategy);
-            }
+        if (isset($this->propertyResolvers['_default'])) {
+            return $this->propertyResolvers['_default'];
         }
-        return $value;
+        return null;
     }
 
     /**
@@ -260,21 +268,68 @@ class Hydrator implements HydratorInterface
      */
     protected function setProperty(ClassMetadata $classMetadata, PropertyMetadata $metadata, $classInstance, $value)
     {
-        if($metadata->access === 'public')
-        {
+        if ($metadata->access === 'public') {
             $classInstance->{$metadata->name} = $value;
             return;
-        }
-        else
-        {
+        } else {
             $setterName = $this->namingStrategy->setterName($metadata);
-            if(isset($classMetadata->methods[$setterName]))
-            {
+            if (isset($classMetadata->methods[$setterName])) {
                 $classInstance->{$setterName}($value);
                 return;
             }
         }
-        throw new \RuntimeException('Cannot find a way to map data to the property '.$classMetadata->name.'::'.$metadata->name);
+        throw new RuntimeException('Cannot find a way to map data to the property ' . $classMetadata->name . '::' . $metadata->name);
+    }
+
+    /**
+     * Maps and type casts the value according to the property metadata. The method will no map the value to the
+     * property
+     *
+     * @param PropertyMetadata $metadata
+     * @param $value
+     * @return array|mixed
+     * @throws InvalidArgumentException
+     * @throws ReflectionException
+     */
+    protected function mapProperty(PropertyMetadata $metadata, $value)
+    {
+        $customTypecast = $this->getSupportedTypecastStrategy($metadata->type);
+        if ($customTypecast !== null) {
+            return $customTypecast->hydrate($metadata->type, $value);
+        }
+        if (!$metadata->type->isFlat && is_array($value)) {
+            if ($metadata->type->isArray) {
+                $res = [];
+                foreach ($value as $key => $item) {
+                    $res[$key] = $this->hydrate($item, $metadata->type->name, $this->strategy);
+                }
+                return $res;
+            } else {
+                return $this->hydrate($value, $metadata->type->name, $this->strategy);
+            }
+        }
+        return $value;
+    }
+
+    /**
+     * Returns the supported typecast strategy service for the given type
+     *
+     * @param TypeMetadata $metadata
+     * @return TypeCastStrategyInterface|null
+     */
+    public function getSupportedTypecastStrategy(TypeMetadata $metadata)
+    {
+        foreach ($this->castStrategies[$this->strategy] as $castStrategy) {
+            if ($castStrategy->isSupported($metadata)) {
+                return $castStrategy;
+            }
+        }
+        foreach ($this->castStrategies['_default'] as $castStrategy) {
+            if ($castStrategy->isSupported($metadata)) {
+                return $castStrategy;
+            }
+        }
+        return null;
     }
 
     /**
@@ -283,49 +338,39 @@ class Hydrator implements HydratorInterface
      * @param mixed $object
      * @param null|string $strategy
      * @return array
-     * @throws \Psr\SimpleCache\InvalidArgumentException
-     * @throws \ReflectionException
+     * @throws InvalidArgumentException
+     * @throws ReflectionException
      */
-    public function extract($object, ?string $strategy=null): array
+    public function extract($object, ?string $strategy = null): array
     {
         $this->strategy = $strategy === null ? '_default' : $strategy;
         $classMetadata = $this->driver->getClassMetadata($this->instantiator->getReflectionClass(get_class($object)));
         $hook = $this->getHookListener($this->strategy);
-        if($hook !== null)
-        {
-            $hook->onBeforeExtract($classMetadata,$object);
+        if ($hook !== null) {
+            $hook->onBeforeExtract($classMetadata, $object);
         }
         $res = [];
-        foreach($classMetadata->properties as $property)
-        {
+        foreach ($classMetadata->properties as $property) {
             $customTypeCaster = $this->getSupportedTypecastStrategy($property->type);
-            if($customTypeCaster !== null)
-            {
-                $this->extractContent($res,$customTypeCaster->extract($property->type,$this->getPropertyValue($classMetadata,$property,$object)),$classMetadata,$property,$object,$hook);
+            if ($customTypeCaster !== null) {
+                $this->extractContent($res, $customTypeCaster->extract($property->type, $this->getPropertyValue($classMetadata, $property, $object)), $classMetadata, $property, $object, $hook);
                 continue;
             }
-            if($property->type->isFlat)
-            {
-                $this->extractContent($res,$this->getPropertyValue($classMetadata,$property,$object),$classMetadata,$property,$object,$hook);
-            }
-            else
-            {
-                if($property->type->isArray)
-                {
-                    $embbed = [];
-                    $values = $this->getPropertyValue($classMetadata,$property,$object);
-                    foreach($values as $key=>$value)
-                    {
-                        $embbed[$key] = $this->extract($value,$this->strategy);
+            if ($property->type->isFlat) {
+                $this->extractContent($res, $this->getPropertyValue($classMetadata, $property, $object), $classMetadata, $property, $object, $hook);
+            } else {
+                if ($property->type->isArray) {
+                    $embed = [];
+                    $values = $this->getPropertyValue($classMetadata, $property, $object);
+                    foreach ($values as $key => $value) {
+                        $embed[$key] = $this->extract($value, $this->strategy);
                     }
-                    $this->extractContent($res,$embbed,$classMetadata,$property,$object,$hook);
-                }
-                else
-                {
-                    $propValue = $this->getPropertyValue($classMetadata,$property,$object);
+                    $this->extractContent($res, $embed, $classMetadata, $property, $object, $hook);
+                } else {
+                    $propValue = $this->getPropertyValue($classMetadata, $property, $object);
                     $this->extractContent(
                         $res,
-                        $propValue === null ? null : $this->extract($propValue,$this->strategy),
+                        $propValue === null ? null : $this->extract($propValue, $this->strategy),
                         $classMetadata,
                         $property,
                         $object,
@@ -334,9 +379,8 @@ class Hydrator implements HydratorInterface
                 }
             }
         }
-        if($hook !== null)
-        {
-            $hook->onAfterExtract($classMetadata,$res);
+        if ($hook !== null) {
+            $hook->onAfterExtract($classMetadata, $res);
         }
         return $res;
     }
@@ -354,35 +398,25 @@ class Hydrator implements HydratorInterface
      */
     protected function extractContent(array &$extractedContent, $value, ClassMetadata $classMetadata, PropertyMetadata $propertyMetadata, $targetObject, ?HydratorHookInterface $hook)
     {
-        $key = $this->extractedPropertyName($propertyMetadata,$targetObject);
-        if(strpos($key,'.') !== false)
-        {
-            $profile = explode('.',$key);
+        $key = $this->extractedPropertyName($propertyMetadata, $targetObject);
+        if (strpos($key, '.') !== false) {
+            $profile = explode('.', $key);
             $ref = &$extractedContent;
-            foreach($profile as $profileIndex=>$profileItem)
-            {
-                if(!isset($profile[$profileIndex + 1]))
-                {
+            foreach ($profile as $profileIndex => $profileItem) {
+                if (!isset($profile[$profileIndex + 1])) {
                     $ref[$profileItem] = $value;
-                }
-                else
-                {
-                    if(isset($extractedContent[$profileItem]))
-                    {
+                } else {
+                    if (isset($extractedContent[$profileItem])) {
                         $ref[$profileItem] = $extractedContent[$profileItem];
-                    }
-                    else
-                    {
+                    } else {
                         $ref[$profileItem] = [];
                     }
                 }
                 $ref = &$ref[$profileItem];
             }
-            if($hook !== null)
-            {
-                $hookContent = $hook->onPropertyExtract($classMetadata,$propertyMetadata,$extractedContent,$preferHook);
-                if($preferHook === true)
-                {
+            if ($hook !== null) {
+                $hookContent = $hook->onPropertyExtract($classMetadata, $propertyMetadata, $extractedContent, $preferHook);
+                if ($preferHook === true) {
                     $extractedContent = $hookContent;
                     return $hookContent;
                 }
@@ -403,11 +437,10 @@ class Hydrator implements HydratorInterface
     protected function extractedPropertyName(PropertyMetadata $propertyMetadata, $targetObject)
     {
         $resolver = $this->getPropertyResolver();
-        if($resolver === null || !$resolver->supportsExtraction($propertyMetadata))
-        {
+        if ($resolver === null || !$resolver->supportsExtraction($propertyMetadata)) {
             return $this->serializedPropertyName($propertyMetadata);
         }
-        return $resolver->extractProperty($propertyMetadata,$targetObject);
+        return $resolver->extractProperty($propertyMetadata, $targetObject);
     }
 
     /**
@@ -420,60 +453,14 @@ class Hydrator implements HydratorInterface
      */
     protected function getPropertyValue(ClassMetadata $classMetadata, PropertyMetadata $propertyMetadata, $object)
     {
-        if($propertyMetadata->access === 'public')
-        {
+        if ($propertyMetadata->access === 'public') {
             return $object->{$propertyMetadata->name};
         }
         $getterName = $this->namingStrategy->getterName($propertyMetadata);
-        if(isset($classMetadata->methods[$getterName]))
-        {
+        if (isset($classMetadata->methods[$getterName])) {
             return $object->{$getterName}();
         }
-        throw new \RuntimeException('Cannot find a way to extract the property '.$classMetadata->name.'::'.$propertyMetadata->name);
-    }
-
-    /**
-     * Adds a type cast strategy to the hydrator. Note the strategies are indexed by their name/sypported types so in
-     * the same strategy name the last supported type string only would work.
-     *
-     * @param TypeCastStrategyInterface $castStrategy
-     * @return $this
-     */
-    public function addTypeCastStrategy(TypeCastStrategyInterface $castStrategy)
-    {
-        $strategy = $castStrategy->strategy();
-        $strategy = $strategy === null ? '_default' : $strategy;
-        if(!isset($this->castStrategies[$strategy]))
-        {
-            $this->castStrategies[$strategy] = [];
-        }
-        $this->castStrategies[$strategy][] = $castStrategy;
-        return $this;
-    }
-
-    /**
-     * Retuns the supported typecast strategy service for the given type
-     *
-     * @param TypeMetadata $metadata
-     * @return TypeCastStrategyInterface|null
-     */
-    public function getSupportedTypecastStrategy(TypeMetadata $metadata)
-    {
-        foreach($this->castStrategies[$this->strategy] as $castStrategy)
-        {
-            if($castStrategy->isSupported($metadata))
-            {
-                return $castStrategy;
-            }
-        }
-        foreach($this->castStrategies['_default'] as $castStrategy)
-        {
-            if($castStrategy->isSupported($metadata))
-            {
-                return $castStrategy;
-            }
-        }
-        return null;
+        throw new RuntimeException('Cannot find a way to extract the property ' . $classMetadata->name . '::' . $propertyMetadata->name);
     }
 
     /**
@@ -481,8 +468,8 @@ class Hydrator implements HydratorInterface
      *
      * @param string $class
      * @return ClassMetadata
-     * @throws \Psr\SimpleCache\InvalidArgumentException
-     * @throws \ReflectionException
+     * @throws InvalidArgumentException
+     * @throws ReflectionException
      */
     public function getClassMetadata(string $class): ClassMetadata
     {
@@ -490,45 +477,13 @@ class Hydrator implements HydratorInterface
     }
 
     /**
-     * Adds a property name resolver in the list
-     *
-     * @param PropertyValueResolverInterface $propertyTargetResolver
-     * @return $this
-     */
-    public function addPropertyResolver(PropertyValueResolverInterface $propertyTargetResolver)
-    {
-        $strategy = $propertyTargetResolver->strategy();
-        $strategy = $strategy === null ? '_default' : $strategy;
-        $this->propertyResolvers[$strategy] = $propertyTargetResolver;
-        return $this;
-    }
-
-    /**
-     * Returns the property resolver for the current or default strategy
-     *
-     * @return PropertyValueResolverInterface|null
-     */
-    protected function getPropertyResolver()
-    {
-        if(isset($this->propertyResolvers[$this->strategy]))
-        {
-            return $this->propertyResolvers[$this->strategy];
-        }
-        if(isset($this->propertyResolvers['_default']))
-        {
-            return $this->propertyResolvers['_default'];
-        }
-        return null;
-    }
-
-    /**
      * Enables the built-in annotation metadata driver in the hydrator
      *
-     * @param string $cacheDir
+     * @param string|null $cacheDir
      * @return $this
-     * @throws \Doctrine\Common\Annotations\AnnotationException
+     * @throws AnnotationException
      */
-    public function enableAnnotations(?string $cacheDir=null)
+    public function enableAnnotations(?string $cacheDir = null)
     {
         $this->driver->enableAnnotations($cacheDir);
         return $this;
@@ -556,17 +511,6 @@ class Hydrator implements HydratorInterface
     {
         $this->hooks[$hook->strategy() === null ? '_default' : $hook->strategy()] = $hook;
         return $this;
-    }
-
-    /**
-     * Returns the hydrator hook for the registered strategy, if any
-     *
-     * @param string $strategy
-     * @return HydratorHookInterface|null
-     */
-    public function getHookListener(string $strategy): ?HydratorHookInterface
-    {
-        return isset($this->hooks[$strategy]) ? $this->hooks[$strategy] : null;
     }
 
     /**
