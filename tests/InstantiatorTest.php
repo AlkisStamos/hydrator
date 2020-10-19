@@ -6,8 +6,8 @@
  * file that was distributed with this source code.
  */
 
-namespace AlkisStamos\Hydrator\Tests;
-use AlkisStamos\Hydrator\Instantiator;
+namespace Alks\Hydrator\Tests;
+use Alks\Hydrator\Instantiator;
 use PHPUnit\Framework\TestCase;
 
 class InstantiatorTest extends TestCase

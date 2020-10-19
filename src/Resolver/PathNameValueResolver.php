@@ -6,7 +6,7 @@
  * file that was distributed with this source code.
  */
 
-namespace AlkisStamos\Hydrator\Resolver;
+namespace Alks\Hydrator\Resolver;
 
 use Alks\Metadata\Metadata\PropertyMetadata;
 

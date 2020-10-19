@@ -6,11 +6,12 @@
  * file that was distributed with this source code.
  */
 
-namespace AlkisStamos\Hydrator\Tests;
-use AlkisStamos\Hydrator\Hydrator;
-use AlkisStamos\Hydrator\HydratorHookInterface;
-use AlkisStamos\Hydrator\InstantiatorInterface;
-use AlkisStamos\Hydrator\Resolver\PropertyValueResolverInterface;
+namespace Alks\Hydrator\Tests;
+
+use Alks\Hydrator\Hydrator;
+use Alks\Hydrator\HydratorHookInterface;
+use Alks\Hydrator\InstantiatorInterface;
+use Alks\Hydrator\Resolver\PropertyValueResolverInterface;
 use Alks\Metadata\Driver\MetadataDriverInterface;
 use Alks\Metadata\Metadata\ClassMetadata;
 use Alks\Metadata\Metadata\PropertyMetadata;

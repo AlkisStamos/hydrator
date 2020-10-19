@@ -1,5 +1,5 @@
 {
-  "name": "alkis-stamos/hydrator",
+  "name": "alks/hydrator",
   "description": "Hydrate or extract data from PHP classes to arrays and back",
   "license": "MIT",
   "keywords": ["hydrator","extract","map"],
@@ -14,13 +14,13 @@
   },
   "autoload": {
 	"psr-4": {
-	  "AlkisStamos\\Hydrator\\": "src"
+	  "Alks\\Hydrator\\": "src"
 	},
 	"classmap": ["mock"]
   },
   "autoload-dev": {
 	"psr-4": {
-	  "AlkisStamos\\Hydrator\\Tests\\": "tests"
+	  "Alks\\Hydrator\\Tests\\": "tests"
 	}
   },
   "require-dev": {

@@ -15,6 +15,6 @@ class MyClass
     public $prop2;
 }
 $data = ['prop1' => 'value1', 'prop2' => 'value2'];
-$hydrator = new \AlkisStamos\Hydrator\Hydrator();
+$hydrator = new \Alks\Hydrator\Hydrator();
 var_dump($hydrator->hydrate($data,MyClass::class));
 ```

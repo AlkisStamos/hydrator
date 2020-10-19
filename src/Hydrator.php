@@ -6,15 +6,15 @@
  * file that was distributed with this source code.
  */
 
-namespace AlkisStamos\Hydrator;
+namespace Alks\Hydrator;
 
-use AlkisStamos\Hydrator\Cast\DateTimeCastStrategy;
-use AlkisStamos\Hydrator\Cast\FlatTypeCastStrategy;
-use AlkisStamos\Hydrator\Cast\TypeCastStrategyInterface;
-use AlkisStamos\Hydrator\Naming\NamingStrategyInterface;
-use AlkisStamos\Hydrator\Naming\UnderscoreNamingStrategy;
-use AlkisStamos\Hydrator\Resolver\PathNameValueResolver;
-use AlkisStamos\Hydrator\Resolver\PropertyValueResolverInterface;
+use Alks\Hydrator\Cast\DateTimeCastStrategy;
+use Alks\Hydrator\Cast\FlatTypeCastStrategy;
+use Alks\Hydrator\Cast\TypeCastStrategyInterface;
+use Alks\Hydrator\Naming\NamingStrategyInterface;
+use Alks\Hydrator\Naming\UnderscoreNamingStrategy;
+use Alks\Hydrator\Resolver\PathNameValueResolver;
+use Alks\Hydrator\Resolver\PropertyValueResolverInterface;
 use Alks\Metadata\Driver\MetadataDriverInterface;
 use Alks\Metadata\Metadata\ClassMetadata;
 use Alks\Metadata\Metadata\PropertyMetadata;
