@@ -15,8 +15,7 @@
   "autoload": {
 	"psr-4": {
 	  "Alks\\Hydrator\\": "src"
-	},
-	"classmap": ["mock"]
+	}
   },
   "autoload-dev": {
 	"psr-4": {
