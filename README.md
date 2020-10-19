@@ -1,11 +1,6 @@
 # hydrator
 hydrates or extracts data from arrays to PHP classes and back
 
-## Installation
-```bash
-composer require alkis-stamos/metadata
-```
-
 ## Usage
 ```php
 <?php
