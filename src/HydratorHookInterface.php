@@ -53,7 +53,7 @@ interface HydratorHookInterface
     public function onBeforeExtract(ClassMetadata $metadata, $instance): void;
 
     /**
-     * Runs as soon as the extaction process is completed
+     * Runs as soon as the extraction process is completed
      *
      * @param ClassMetadata $metadata
      * @param array $data

@@ -8,6 +8,7 @@
 
 namespace Alks\Hydrator\Tests;
 
+use Alks\Hydrator\Cast\TypeCastStrategyInterface;
 use Alks\Hydrator\Hydrator;
 use Alks\Hydrator\HydratorHookInterface;
 use Alks\Hydrator\InstantiatorInterface;
@@ -99,11 +100,70 @@ class HydratorTest extends TestCase
         $this->assertNull($instance->prop1);
         $this->assertEquals('thisisthevalue', $instance->prop2);
     }
+
+    public function testHydrateWithCustomStrategy()
+    {
+        $typeCaster = $this->createMock(TypeCastStrategyInterface::class);
+        $typeCaster->expects($this->once())->method('strategy')->willReturn('custom_strategy');
+        $typeCaster->expects($this->exactly(2))->method('isSupported')->willReturn(true);
+        $typeCaster->expects($this->exactly(2))->method('hydrate')->willReturn('custom_value');
+        $data = ['prop1' => 'prop1', 'prop2' => 'prop2'];
+        $hydrator = new Hydrator();
+        $hydrator->addTypeCastStrategy($typeCaster);
+        /** @var MockHydrateClass1 $res */
+        $res = $hydrator->hydrate($data, MockHydrateClass1::class, 'custom_strategy');
+        $this->assertInstanceOf(MockHydrateClass1::class, $res);
+        $this->assertEquals('custom_value', $res->prop1);
+        $this->assertEquals('custom_value', $res->prop2);
+    }
+
+
+    public function testHydrateWithSetters()
+    {
+        $hydrator = new Hydrator();
+        $data = ['prop1' => 'prop1', 'prop2' => 'false'];
+        /** @var MockHydrateClass2 $res */
+        $res = $hydrator->hydrate($data, MockHydrateClass2::class);
+        $this->assertEquals('prop1', $res->getProp1());
+        $this->assertFalse($res->getProp2());
+    }
 }
 
-class MockEmptyClass {}
+class MockEmptyClass
+{
+}
+
 class MockHydrateClass1
 {
     public $prop1;
     public $prop2;
+}
+
+class MockHydrateClass2
+{
+    /** @var string */
+    protected $prop1;
+    /** @var bool */
+    protected $prop2;
+
+    public function getProp1()
+    {
+        return $this->prop1;
+    }
+
+    public function setProp1(string $prop1): void
+    {
+        $this->prop1 = $prop1;
+    }
+
+    public function getProp2()
+    {
+        return $this->prop2;
+    }
+
+    public function setProp2(bool $prop2): void
+    {
+        $this->prop2 = $prop2;
+    }
+
 }
